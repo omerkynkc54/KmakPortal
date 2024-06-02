@@ -5,19 +5,18 @@ using Microsoft.AspNetCore.Identity;
 
 namespace KmakPortal.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
+    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
 
+        public DbSet<Department> Departments { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderStatus> OrderStatuses { get; set; }
         public DbSet<OrderType> OrderTypes { get; set; }
         public DbSet<UnitOfMeasure> UnitOfMeasures { get; set; }
-        public DbSet<Department> Departments { get; set; }
-        public DbSet<OrderStatus> OrderStatuses { get; set; }
-        public DbSet<User> Users { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

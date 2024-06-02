@@ -1,14 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using KmakPortal.Data;
+using KmakPortal.Models;
 using KmakPortal.Seed;
-using System;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrEmpty(connectionString))
     throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -16,15 +14,24 @@ if (string.IsNullOrEmpty(connectionString))
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+// Add Identity and configure using custom User model
+builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
     options.User.RequireUniqueEmail = false;
 })
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+    });
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages(); // Add Razor Pages services
 
 var app = builder.Build();
 
@@ -43,7 +50,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -60,7 +66,8 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapRazorPages();
+    pattern: "{controller=Account}/{action=Login}/{id?}");
+
+app.MapRazorPages(); // Map Razor Pages
 
 app.Run();
