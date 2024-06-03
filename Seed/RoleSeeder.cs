@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using KmakPortal.Models;
 using KmakPortal.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace KmakPortal.Seed
 {
@@ -15,11 +16,22 @@ namespace KmakPortal.Seed
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
 
+            // Seed departments if none exist
+            if (!await context.Departments.AnyAsync())
+            {
+                context.Departments.AddRange(
+                    new Department { DepartmentName = "Montaj" },
+                    new Department { DepartmentName = "Kaynaklı İmalat" },
+                    new Department { DepartmentName = "Talaşlı İmalat" }
+                );
+                await context.SaveChangesAsync();
+            }
+
             string[] roleNames = { "Yönetim", "Üretim", "Satın Alma", "Satış" };
 
             foreach (var roleName in roleNames)
             {
-                if (!context.Roles.Any(r => r.Name == roleName))
+                if (!await roleManager.RoleExistsAsync(roleName))
                 {
                     await roleManager.CreateAsync(new IdentityRole<int> { Name = roleName });
                 }
@@ -28,18 +40,14 @@ namespace KmakPortal.Seed
             var adminUser = new User
             {
                 UserName = "Ömer Kaynakçıoğlu",
-                DepartmentId = 1, // Adjust as necessary
-                RoleId = context.UserRoles.First(r => r.Role == "Yönetim").Id,
-                PasswordHash = new PasswordHasher<User>().HashPassword(null, "Admin@123")
+                DepartmentId = context.Departments.First().Id, // Adjust as necessary
             };
 
-            if (!context.Users.Any(u => u.UserName == adminUser.UserName))
+            var user = await userManager.FindByNameAsync(adminUser.UserName);
+            if (user == null)
             {
-                var result = await userManager.CreateAsync(adminUser);
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Yönetim");
-                }
+                await userManager.CreateAsync(adminUser, "Admin@123");
+                await userManager.AddToRoleAsync(adminUser, "Yönetim");
             }
 
             context.SaveChanges();

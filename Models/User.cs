@@ -12,9 +12,6 @@ namespace KmakPortal.Models
         [ForeignKey("DepartmentId")]
         public virtual Department Department { get; set; }
 
-        [ForeignKey("RoleId")]
-        public virtual UserRole Role { get; set; }
-
-        public ICollection<Order> Orders { get; set; }
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using KmakPortal.Models;
-using Microsoft.AspNetCore.Identity;
 
 namespace KmakPortal.Data
 {
@@ -17,13 +17,11 @@ namespace KmakPortal.Data
         public DbSet<OrderStatus> OrderStatuses { get; set; }
         public DbSet<OrderType> OrderTypes { get; set; }
         public DbSet<UnitOfMeasure> UnitOfMeasures { get; set; }
-        public DbSet<UserRole> UserRoles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure relationships for the Orders table
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.OrderType)
                 .WithMany(ot => ot.Orders)

@@ -1,4 +1,7 @@
 ﻿@model KmakPortal.Models.LoginViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+@inject SignInManager<User> SignInManager
 
 <!DOCTYPE html>
 <html lang="en">
