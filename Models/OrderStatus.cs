@@ -6,11 +6,7 @@ namespace KmakPortal.Models
 {
     public class OrderStatus
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public string Status { get; set; }
-
-        public ICollection<Order> Orders { get; set; }
+        public string Name { get; set; }
     }
 }

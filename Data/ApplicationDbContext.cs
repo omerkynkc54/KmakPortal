@@ -5,13 +5,10 @@ using KmakPortal.Models;
 
 namespace KmakPortal.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
+    public class ApplicationDbContext : IdentityDbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
-
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        { }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderStatus> OrderStatuses { get; set; }
@@ -22,35 +19,25 @@ namespace KmakPortal.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.OrderType)
-                .WithMany(ot => ot.Orders)
-                .HasForeignKey(o => o.OrderTypeId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Seed data for enumerations
+            modelBuilder.Entity<UnitOfMeasure>().HasData(
+                new UnitOfMeasure { Id = 1, Name = "Kilogram" },
+                new UnitOfMeasure { Id = 2, Name = "Liter" },
+                new UnitOfMeasure { Id = 3, Name = "Piece" }
+            );
 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.UnitOfMeasure)
-                .WithMany(uom => uom.Orders)
-                .HasForeignKey(o => o.UnitOfMeasureId)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<OrderStatus>().HasData(
+                new OrderStatus { Id = 1, Name = "Pending" },
+                new OrderStatus { Id = 2, Name = "Approved" },
+                new OrderStatus { Id = 3, Name = "Delivered" },
+                new OrderStatus { Id = 4, Name = "Confirmed" }
+            );
 
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.Department)
-                .WithMany(d => d.Orders)
-                .HasForeignKey(o => o.DepartmentId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.Requester)
-                .WithMany(u => u.Orders)
-                .HasForeignKey(o => o.RequesterId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.OrderStatus)
-                .WithMany(os => os.Orders)
-                .HasForeignKey(o => o.OrderStatusId)
-                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Department>().HasData(
+                new Department { Id = 1, Name = "Production" },
+                new Department { Id = 2, Name = "Purchasing" }
+            );
         }
+
     }
 }
